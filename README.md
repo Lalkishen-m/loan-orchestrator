@@ -81,31 +81,20 @@ The workflow follows a state-driven orchestration model:
 **1. Typed State**
 
 The workflow uses a structured LoanState schema based on Python's TypedDict.
-
 The state maintains information such as:
-
 Application details
 Current workflow stage
 Verification results
 Risk assessment
 Policy status
 Human decision
-
 This provides a clearly defined contract for information flowing between workflow nodes.
 
 **2. Conditional Routing**
 
-Different application outcomes result in different workflow paths.
-
-For example:
-
-Validation
-    │
-    ├── Valid ──────→ Verification
-    │
-    └── Invalid ────→ Rejection
-
-Similarly, the policy stage determines whether the application can proceed automatically or requires human review.
+This allows the Loan Orchestrator to handle different loan scenarios dynamically, rather than forcing every application through the same sequence of steps. For example:
+After application validation, a valid application moves to verification, while an invalid application is rejected.
+After risk assessment and policy checks, low-risk applications can proceed, while applications requiring additional assessment are routed to human review.
 
 **3. Parallel Execution**
 
