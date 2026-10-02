@@ -18,12 +18,12 @@ The workflow follows a state-driven orchestration model:
                            │
                            ▼
                 ┌─────────────────────┐
-                │ Receive Application  │
+                │ Receive Application │
                 └──────────┬──────────┘
                            │
                            ▼
                 ┌─────────────────────┐
-                │ Validate Application │
+                │ Validate Application│
                 └──────────┬──────────┘
                            │
                     ┌──────┴──────┐
@@ -42,8 +42,8 @@ The workflow follows a state-driven orchestration model:
        │ KYC │ │ Income │ │  Fraud  │
        │Check│ │ Check  │ │  Check  │
        └──┬──┘ └───┬────┘ └────┬────┘
-          │        │            │
-          └────────┼────────────┘
+          │        │           │
+          └────────┼───────────┘
                    ▼
        ┌─────────────────────────┐
        │ Verification Status     │
@@ -109,102 +109,34 @@ Similarly, the policy stage determines whether the application can proceed autom
 
 **3. Parallel Execution**
 
-Multiple verification activities can execute independently:
-
-                Start Verification
-                 /       |       \
-                ↓        ↓        ↓
-              KYC     Income    Fraud
-                \       |       /
-                 \      |      /
-                    ↓
-          Verification Complete
-
-This demonstrates LangGraph's ability to model fan-out and fan-in workflow patterns.
+Multiple verification activities can execute independently. This demonstrates LangGraph's ability to model fan-out and fan-in workflow patterns.
 
 **4. State Reducers**
 
-Verification results from multiple parallel branches need to be combined into a shared state.
-
-The project uses reducers to merge verification results rather than allowing parallel nodes to overwrite each other's state.
-
-Conceptually:
-
-KYC Result      ──┐
-                  │
-Income Result  ───┼──→ Verification Results
-                  │
-Fraud Result   ───┘
-
-This is important when multiple nodes update the same state field concurrently.
+Verification results from multiple parallel branches need to be combined into a shared state. The project uses reducers to merge verification results rather than allowing parallel nodes to overwrite each other's state. This is important when multiple nodes update the same state field concurrently.
 
 **5. Checkpointing and Recovery**
-
-The workflow uses SQLite-based checkpointing through LangGraph.
-
-Workflow state is persisted using:
-
-SqliteSaver
-      │
-      ▼
-loan_orchestrator.db
-
+The workflow uses SQLite-based checkpointing through LangGraph. This allows the workflow state to be recovered rather than requiring the entire process to start from the beginning.
 Each workflow execution is associated with a thread_id.
-
-For example:
-
-loan_application_102
-
-This allows the workflow state to be recovered rather than requiring the entire process to start from the beginning.
+For example: loan_application_102
 
 **6. Human-in-the-Loop**
 
 Applications requiring additional review can pause the workflow using LangGraph's interrupt() mechanism.
-
-Automated Workflow
-       │
-       ▼
-  Policy Check
-       │
-       ▼
- Human Review
-       │
-  interrupt()
-       │
-       ▼
-Human Decision
-       │
- ┌─────┴─────┐
- ▼           ▼
-Approve     Reject
- │           │
- └─────┬─────┘
-       ▼
-   Finalize
-
-The workflow can then resume using:
-
-Command(resume=decision)
-
+The workflow can then resume using:Command(resume=decision)
 This demonstrates how human decisions can become part of a stateful workflow rather than being handled as an external process.
 
 ## 🔍 Debugging and Auditability
 
 The workflow exposes its state and next execution point using LangGraph's state inspection capabilities.
-
-For example:
-
-graph.get_state(config)
-
+For example: graph.get_state(config)
 The application can inspect information such as:
-
 Current workflow state
 Current stage
 Risk assessment
 Policy status
 Human decision
 Next node to execute
-
 Combined with persistent checkpoints, this provides a foundation for traceable and auditable workflow execution.
 
 ## 🧠 Multi-Agent / Supervisor–Worker Design Perspective
@@ -227,7 +159,6 @@ The architecture can naturally evolve toward a Supervisor–Worker model:
                   Human Review
 
 In such an architecture, a supervisor could coordinate specialized worker agents while maintaining a shared workflow state.
-
 This project intentionally keeps the current implementation deterministic and explainable rather than introducing unnecessary autonomous agent behavior.
 
 ## 🧪 Example Workflow Output
