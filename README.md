@@ -1,27 +1,16 @@
-## Loan Orchestrator
+### Loan Orchestrator
 
-A stateful loan workflow orchestration system built with Python and LangGraph, designed to demonstrate reliable, human-governed workflow execution across a simulated loan processing journey.
+A stateful loan workflow orchestration system built with Python and **LangGraph**, designed to demonstrate reliable, human-governed workflow execution across a simulated loan processing journey.
 
-The project focuses on state management, conditional routing, parallel verification, checkpoint-based recovery, and human-in-the-loop decision making using LangGraph.
+The project focuses on **state management, conditional routing, parallel verification, checkpoint-based recovery, and human-in-the-loop** decision making using LangGraph.
 
 Note: This is a simulated portfolio project. It does not connect to real banking, credit bureau, KYC, fraud, or lending systems and does not make real-world lending decisions.
 
-🎯 Project Objective
+## 🎯 Project Objective
 
-Loan processing involves multiple stages such as application validation, identity verification, income verification, risk assessment, policy checks, and exception handling.
+Loan processing involves multiple stages such as application validation, identity verification, income verification, risk assessment, policy checks, and human approvals. Loan Orchestrator uses LangGraph to model these stages as a stateful workflow, enabling parallel verification, conditional routing, checkpoint-based recovery, and human-in-the-loop decision-making. The project demonstrates how complex, long-running business workflows can be made more structured, reliable, auditable, and fault-tolerant using graph-based orchestration.
 
-A traditional sequential workflow can become difficult to manage when:
-
-Multiple verification processes need to run in parallel
-Different outcomes require different workflow paths
-A workflow needs to pause for human intervention
-Long-running workflows need to survive interruptions
-Previous workflow state needs to be recovered
-Execution needs to remain traceable and auditable
-
-Loan Orchestrator demonstrates how these challenges can be addressed using LangGraph's stateful graph-based workflow architecture.
-
-🏗️ Architecture
+## 🏗️ Architecture
 
 The workflow follows a state-driven orchestration model:
 
@@ -67,7 +56,7 @@ The workflow follows a state-driven orchestration model:
                     │
                     ▼
        ┌─────────────────────────┐
-       │ Policy Check             │
+       │ Policy Check            │
        └────────────┬────────────┘
                     │
               ┌─────┴─────┐
@@ -79,7 +68,7 @@ The workflow follows a state-driven orchestration model:
                       │ interrupt │
                       └─────┬─────┘
                             │
-                     Human Decision
+                      Human Decision
                       Approve/Reject
                             │
                             ▼
@@ -87,8 +76,9 @@ The workflow follows a state-driven orchestration model:
                             │
                             ▼
                            END
-🔑 Key LangGraph Concepts Demonstrated
-1. Typed State
+                           
+## 🔑 Key LangGraph Concepts Demonstrated
+**1. Typed State**
 
 The workflow uses a structured LoanState schema based on Python's TypedDict.
 
@@ -103,7 +93,7 @@ Human decision
 
 This provides a clearly defined contract for information flowing between workflow nodes.
 
-2. Conditional Routing
+**2. Conditional Routing**
 
 Different application outcomes result in different workflow paths.
 
@@ -117,7 +107,7 @@ Validation
 
 Similarly, the policy stage determines whether the application can proceed automatically or requires human review.
 
-3. Parallel Execution
+**3. Parallel Execution**
 
 Multiple verification activities can execute independently:
 
@@ -132,7 +122,7 @@ Multiple verification activities can execute independently:
 
 This demonstrates LangGraph's ability to model fan-out and fan-in workflow patterns.
 
-4. State Reducers
+**4. State Reducers**
 
 Verification results from multiple parallel branches need to be combined into a shared state.
 
@@ -148,7 +138,7 @@ Fraud Result   ───┘
 
 This is important when multiple nodes update the same state field concurrently.
 
-5. Checkpointing and Recovery
+**5. Checkpointing and Recovery**
 
 The workflow uses SQLite-based checkpointing through LangGraph.
 
@@ -167,7 +157,7 @@ loan_application_102
 
 This allows the workflow state to be recovered rather than requiring the entire process to start from the beginning.
 
-6. Human-in-the-Loop
+**6. Human-in-the-Loop**
 
 Applications requiring additional review can pause the workflow using LangGraph's interrupt() mechanism.
 
@@ -179,7 +169,7 @@ Automated Workflow
        ▼
  Human Review
        │
-    interrupt()
+  interrupt()
        │
        ▼
 Human Decision
@@ -198,7 +188,7 @@ Command(resume=decision)
 
 This demonstrates how human decisions can become part of a stateful workflow rather than being handled as an external process.
 
-🔍 Debugging and Auditability
+## 🔍 Debugging and Auditability
 
 The workflow exposes its state and next execution point using LangGraph's state inspection capabilities.
 
@@ -217,26 +207,7 @@ Next node to execute
 
 Combined with persistent checkpoints, this provides a foundation for traceable and auditable workflow execution.
 
-Example execution flow:
-
-Application received
-        ↓
-Application validated
-        ↓
-Verification started
-        ↓
-KYC / Income / Fraud checks
-        ↓
-Risk assessment
-        ↓
-Policy check
-        ↓
-Human review
-        ↓
-Human decision
-        ↓
-Application finalized
-🧠 Multi-Agent / Supervisor–Worker Design Perspective
+## 🧠 Multi-Agent / Supervisor–Worker Design Perspective
 
 The current implementation focuses on stateful workflow orchestration using specialized workflow nodes rather than independent autonomous agents.
 
@@ -259,112 +230,7 @@ In such an architecture, a supervisor could coordinate specialized worker agents
 
 This project intentionally keeps the current implementation deterministic and explainable rather than introducing unnecessary autonomous agent behavior.
 
-🛡️ Reliability Through Statefulness
-
-One of the key design principles demonstrated by this project is that statefulness improves reliability in long-running workflows.
-
-Without persistent state, an interrupted workflow could lose information about:
-
-Which verification steps were completed
-Risk assessment results
-Policy decisions
-Human review status
-
-With checkpointing:
-
-Workflow Execution
-       │
-       ▼
-   State Update
-       │
-       ▼
-   Checkpoint
-       │
-       ▼
-Workflow Interrupted
-       │
-       ▼
-State Recovered
-       │
-       ▼
-Workflow Resumed
-
-This makes the workflow more resilient to interruptions and particularly useful for processes involving human intervention.
-
-🧩 Technology Stack
-Technology	Purpose
-Python	Application development
-LangGraph	Stateful workflow orchestration
-LangGraph Checkpointing	Workflow persistence and recovery
-SQLite	Persistent checkpoint storage
-TypedDict	Structured workflow state
-VS Code	Development environment
-📁 Project Structure
-loan-orchestrator/
-│
-├── src/
-│   └── loan_orchestrator/
-│       ├── __init__.py
-│       ├── graph.py
-│       ├── nodes.py
-│       └── state.py
-│
-├── README.md
-├── requirements.txt
-├── .gitignore
-└── screenshots/
-    └── workflow-output.png
-File Responsibilities
-
-state.py
-
-Defines the typed workflow state and structured verification results.
-
-nodes.py
-
-Contains the individual workflow operations such as:
-
-Application validation
-KYC verification
-Income verification
-Fraud verification
-Risk assessment
-Policy evaluation
-Human review
-Application finalization
-
-graph.py
-
-Builds and compiles the LangGraph workflow, defines routing and parallel execution, and configures checkpoint persistence.
-
-⚙️ Getting Started
-Prerequisites
-Python 3.10+
-Git
-VS Code or another Python IDE
-1. Clone the repository
-git clone <YOUR_GITHUB_REPOSITORY_URL>
-cd loan-orchestrator
-2. Create a virtual environment
-
-Windows:
-
-python -m venv .venv
-
-Activate it:
-
-.venv\Scripts\activate
-3. Install dependencies
-pip install -r requirements.txt
-4. Run the workflow
-
-From the project root:
-
-python -m src.loan_orchestrator.graph
-
-The workflow will execute the simulated loan journey and pause for human approval when the policy requires human review.
-
-🧪 Example Workflow Output
+## 🧪 Example Workflow Output
 Application received: 102
 Application validated: 102
 
@@ -390,47 +256,3 @@ Human decision received: APPROVE
 
 ===== FINAL WORKFLOW STATE =====
 ...
-🚧 Scope and Limitations
-
-This project is intentionally a simulated loan workflow.
-
-It does not:
-
-Connect to real banking systems
-Access real customer information
-Perform real KYC
-Query real credit bureaus
-Perform real fraud detection
-Make real lending decisions
-Disburse loans
-
-The purpose is to demonstrate workflow orchestration, state management, reliability, and human governance using LangGraph.
-
-🚀 Future Architecture Opportunities
-
-The current project provides a foundation for several possible extensions:
-
-Supervisor–Worker multi-agent architecture
-Subgraph-based workflow decomposition
-LLM-powered document analysis
-Exception classification
-Automated policy interpretation
-Human approval interfaces
-More sophisticated audit trails
-Automated workflow testing
-Observability and monitoring
-API-based workflow execution
-
-These are architectural extensions rather than requirements of the current implementation.
-
-💡 Key Takeaways
-
-This project demonstrates how LangGraph can be used to build workflows that are:
-
-Stateful — workflow context is maintained throughout execution
-Conditional — different outcomes follow different paths
-Parallel — independent verification tasks can execute concurrently
-Persistent — checkpoints allow workflow state to survive interruptions
-Human-governed — sensitive workflow decisions can involve human approval
-Debuggable — workflow state and next execution steps can be inspected
-Auditable — execution stages and decisions are explicitly represented
